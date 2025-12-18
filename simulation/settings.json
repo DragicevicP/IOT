@@ -3,5 +3,10 @@
         "simulated": true,
         "pin": 17,
         "poll_interval": 2
-    } 
+    },
+    "DB": {
+        "simulated": true,
+        "pin": 27,
+        "active_high": true
+    }
 }
