@@ -1,5 +1,7 @@
-def led_on():
-    print("[SIM] DL LED -> ON")
 
-def led_off():
-    print("[SIM] DL LED -> OFF")
+class SimLed:
+    def on(self):
+        print("[SIM] DL LED -> ON")
+
+    def off(self):
+        print("[SIM] DL LED -> OFF")

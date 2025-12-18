@@ -1,12 +1,13 @@
 
 import threading
 import time
+
 from cli import cli_loop
 from settings import load_settings
 from components.door_sensor import run_door_sensor
 from components.door_buzzer import run_door_buzzer
 from components.ultrasonic import run_ultrasonic
-from components.led import run_door_ligth
+from components.led import run_door_light
 
 try:
     import RPi.GPIO as GPIO
@@ -22,13 +23,14 @@ if __name__ == "__main__":
     threads = []
     stop_event = threading.Event()
 
-    registry = {}
+    registry = {
+    }
 
     try:
         run_ultrasonic(settings["DUS1"], threads, stop_event)
         run_door_sensor(settings["DS1"], threads, stop_event)
         run_door_buzzer(settings["DB"], registry, stop_event)
-        run_door_ligth(settings["DL"], registry, stop_event)
+        run_door_light(settings["DL"], registry, stop_event)
 
         cli_thread = threading.Thread(
             target=cli_loop,

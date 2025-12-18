@@ -27,67 +27,32 @@ def handle_db_command(cmd, registry: dict, stop_event):
       db on
       db off
       db beep
-      db beep <count>
-      db beep <count> <on_ms> <off_ms>
-      help
-      exit
     """
     print("CLI ready. Type: help")
 
-    while not stop_event.is_set():
-        try:
-            line = input("> ").strip()
-        except (EOFError, KeyboardInterrupt):
-            stop_event.set()
-            break
+    buzzer = registry.get("DB")
+    if buzzer is None:
+        print("DB not configured.")
+        return
 
-        if not line:
-            continue
+    if len(cmd) < 2:
+        print("Usage: db on | off | beep")
+        return
 
-        cmd = line.lower().split()
+    action = cmd[1]
 
-        if cmd[0] in ("exit", "quit"):
-            stop_event.set()
-            break
+    if action == "on":
+        buzzer.on()
+        print("DB: ON")
 
-        if cmd[0] == "help":
-            print("Commands:")
-            print("  db on")
-            print("  db off")
-            print("  db beep")
-            print("  db beep <count>")
-            print("  db beep <count> <on_ms> <off_ms>")
-            print("  exit")
-            continue
+    elif action == "off":
+        buzzer.off()
+        print("DB: OFF")
 
-        if cmd[0] != "db":
-            print("Unknown command. Type: help")
-            continue
+    elif action == "beep":
+        buzzer.beep()
+        print("DB: BEEP")
 
-        buzzer = registry.get("DB")
-        if buzzer is None:
-            print("DB not configured/started.")
-            continue
+    else:
+        print("Unknown DB command")
 
-        if len(cmd) == 1:
-            print("Usage: db on|off|beep ...")
-            continue
-
-        action = cmd[1]
-
-        if action == "on":
-            buzzer.on()
-            print(f"[{_ts()}] DB: ON")
-        elif action == "off":
-            buzzer.off()
-            print(f"[{_ts()}] DB: OFF")
-        elif action == "beep":
-            count = int(cmd[2]) if len(cmd) >= 3 else 1
-            on_ms = int(cmd[3]) if len(cmd) >= 4 else 200
-            off_ms = int(cmd[4]) if len(cmd) >= 5 else 200
-            # beep u thread-u da ne blokira CLI
-            t = threading.Thread(target=buzzer.beep, args=(count, on_ms, off_ms, stop_event), daemon=True)
-            t.start()
-            print(f"[{_ts()}] DB: BEEP x{count}")
-        else:
-            print("Unknown db action. Use: on/off/beep")

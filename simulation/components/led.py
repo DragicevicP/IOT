@@ -1,22 +1,19 @@
 import time
 
+
 def _ts():
     return time.strftime("%H:%M:%S")
 
-def run_door_ligth(settings, registry: dict, stop_event):
-
+def run_door_light(settings, registry: dict, stop_event):
     if settings.get("simulated", True):
-        from simulators.led import led_on as sim_led_on, led_off as sim_led_off
+        from simulators.led import SimLed
+        led = SimLed()
         print(f"[{_ts()}] DL ready (sim)")
-        registry["DL_on"] = sim_led_on
-        registry["DL_off"] = sim_led_off
     else:
         from sensors.led import Led
         led = Led(settings["pin"])
         print(f"[{_ts()}] DL ready (GPIO pin={settings['pin']})")
-        registry["DL_on"] = led.on
-        registry["DL_off"] = led.off
-
+    registry["DL"] = led
 
 def handle_dl_command(cmd, registry, stop_event):
     light = registry.get("DL")
