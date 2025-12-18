@@ -1,0 +1,16 @@
+import time
+import random
+
+def run_door_sensor_simulator(delay, callback, stop_event):
+    state = 0  # vrata zatvorena
+
+    while True:
+        # nasumično promeni stanje
+        if random.random() > 0.7:
+            state = 1 - state  # toggle 0 <-> 1
+
+        callback(state)
+
+        time.sleep(delay)
+        if stop_event.is_set():
+            break
