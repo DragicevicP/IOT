@@ -8,5 +8,9 @@
         "simulated": true,
         "pin": 27,
         "active_high": true
+    },
+    "DUS1": {
+        "simulated": true,
+        "poll_interval": 2
     }
 }

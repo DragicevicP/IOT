@@ -4,6 +4,7 @@ import time
 from settings import load_settings
 from components.door_sensor import run_door_sensor
 from components.door_buzzer import run_door_buzzer, start_buzzer_cli
+from components.ultrasonic import run_ultrasonic
 try:
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
@@ -22,7 +23,7 @@ if __name__ == "__main__":
 
     try:
         run_door_sensor(settings["DS1"], threads, stop_event)
-
+        run_ultrasonic(settings["DUS1"], threads, stop_event)
         run_door_buzzer(settings["DB"], registry, stop_event)
 
         #CLI za kontrolu DB
