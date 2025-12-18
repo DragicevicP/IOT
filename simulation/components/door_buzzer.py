@@ -21,7 +21,7 @@ def run_door_buzzer(settings, registry: dict, stop_event):
 
     registry["DB"] = buzzer
 
-def start_buzzer_cli(registry: dict, stop_event):
+def handle_db_command(cmd, registry: dict, stop_event):
     """
     Komande:
       db on

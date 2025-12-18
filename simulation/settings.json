@@ -2,7 +2,7 @@
     "DS1": {
         "simulated": true,
         "pin": 17,
-        "poll_interval": 2
+        "poll_interval": 20
     },
     "DB": {
         "simulated": true,
@@ -11,6 +11,10 @@
     },
     "DUS1": {
         "simulated": true,
-        "poll_interval": 2
+        "poll_interval": 20
+    },
+    "DL": {
+        "simulated": true,
+        "pin": 23
     }
 }

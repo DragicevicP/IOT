@@ -10,7 +10,6 @@ def run_ultrasonic(settings, threads, stop_event):
     delay = settings.get("poll_interval", 2)
 
     if settings["simulated"]:
-        print("Starting DUS1 simulator")
         t = threading.Thread(
             target=run_ultrasonic_simulator,
             args=(delay, ultrasonic_callback, stop_event)

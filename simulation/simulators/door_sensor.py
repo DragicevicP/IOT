@@ -7,7 +7,7 @@ def run_door_sensor_simulator(delay, callback, stop_event):
     while True:
         # nasumično promeni stanje
         if random.random() > 0.7:
-            state = 1 - state  # toggle 0 <-> 1
+            state = 1 - state  
 
         callback(state)
 

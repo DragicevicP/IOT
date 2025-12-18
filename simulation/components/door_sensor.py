@@ -11,7 +11,6 @@ def run_door_sensor(settings, threads, stop_event):
     delay = settings.get("poll_interval", 2)
 
     if settings["simulated"]:
-        print("Starting DS1 simulator")
         t = threading.Thread(
             target=run_door_sensor_simulator,
             args=(delay, door_sensor_callback, stop_event)
