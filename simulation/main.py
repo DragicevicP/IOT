@@ -8,6 +8,8 @@ from components.door_sensor import run_door_sensor
 from components.door_buzzer import run_door_buzzer
 from components.ultrasonic import run_ultrasonic
 from components.led import run_door_light
+from components.door_motion_sensor import run_door_motion_sensor
+from components.door_membrane_switch import run_door_membrane_switch
 
 try:
     import RPi.GPIO as GPIO
@@ -31,6 +33,8 @@ if __name__ == "__main__":
         run_door_sensor(settings["DS1"], threads, stop_event)
         run_door_buzzer(settings["DB"], registry, stop_event)
         run_door_light(settings["DL"], registry, stop_event)
+        run_door_motion_sensor(settings["DPIR1"], threads, stop_event)
+        run_door_membrane_switch(settings["DMS"], threads, stop_event)
 
         cli_thread = threading.Thread(
             target=cli_loop,
@@ -42,7 +46,6 @@ if __name__ == "__main__":
         while not stop_event.is_set():
             time.sleep(0.2)
             
-        
 
     except KeyboardInterrupt:
         print("Stopping system")

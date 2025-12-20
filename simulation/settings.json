@@ -16,5 +16,17 @@
     "DL": {
         "simulated": true,
         "pin": 23
+    },
+    "DPIR1": {
+        "simulated": true,
+        "pin": 24,
+        "poll_interval": 2
+    },
+    "DMS": {
+        "simulated": true,
+        "pin": 23,
+        "poll_interval": 2
     }
+
+
 }
