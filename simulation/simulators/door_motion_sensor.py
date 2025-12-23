@@ -2,10 +2,9 @@ import time
 import random
 
 def run_door_motion_simulator(delay, callback, stop_event):
-    state = 0  # nema pokreta
+    state = 0 
 
     while True:
-        # PIR: obično se javi "spike" pokreta, pa se vrati na 0
         if random.random() > 0.8:
             state = 1
         else:

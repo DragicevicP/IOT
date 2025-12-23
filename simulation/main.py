@@ -11,12 +11,6 @@ from components.led import run_door_light
 from components.door_motion_sensor import run_door_motion_sensor
 from components.door_membrane_switch import run_door_membrane_switch
 
-try:
-    import RPi.GPIO as GPIO
-    GPIO.setmode(GPIO.BCM)
-except:
-    pass
-
 
 if __name__ == "__main__":
     print("Starting PI1 Door System")
@@ -25,8 +19,7 @@ if __name__ == "__main__":
     threads = []
     stop_event = threading.Event()
 
-    registry = {
-    }
+    registry = {}
 
     try:
         run_ultrasonic(settings["DUS1"], threads, stop_event)

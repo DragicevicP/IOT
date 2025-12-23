@@ -2,10 +2,10 @@ import time
 import random
 
 def run_door_sensor_simulator(delay, callback, stop_event):
-    state = 0  # vrata zatvorena
+    state = 0  
 
     while True:
-        # nasumično promeni stanje
+        
         if random.random() > 0.7:
             state = 1 - state  
 

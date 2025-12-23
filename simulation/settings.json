@@ -20,12 +20,12 @@
     "DPIR1": {
         "simulated": true,
         "pin": 24,
-        "poll_interval": 2
+        "poll_interval": 20
     },
     "DMS": {
         "simulated": true,
         "pin": 23,
-        "poll_interval": 2
+        "poll_interval": 20
     }
 
 

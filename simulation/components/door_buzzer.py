@@ -26,7 +26,6 @@ def handle_db_command(cmd, registry: dict, stop_event):
     Komande:
       db on
       db off
-      db beep
     """
     print("CLI ready. Type: help")
 
@@ -36,7 +35,7 @@ def handle_db_command(cmd, registry: dict, stop_event):
         return
 
     if len(cmd) < 2:
-        print("Usage: db on | off | beep")
+        print("Usage: db on | off ")
         return
 
     action = cmd[1]
@@ -48,11 +47,7 @@ def handle_db_command(cmd, registry: dict, stop_event):
     elif action == "off":
         buzzer.off()
         print("DB: OFF")
-
-    elif action == "beep":
-        buzzer.beep()
-        print("DB: BEEP")
-
+        
     else:
         print("Unknown DB command")
 

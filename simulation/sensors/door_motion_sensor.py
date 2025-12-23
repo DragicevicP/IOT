@@ -4,7 +4,6 @@ import time
 class DoorMotionSensor:
     def __init__(self, pin):
         self.pin = pin
-        # PIR tipično daje digitalni HIGH kad detektuje pokret
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     def read(self):
