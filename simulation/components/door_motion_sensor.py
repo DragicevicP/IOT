@@ -1,16 +1,17 @@
 import threading
 import time
 from simulators.door_motion_sensor import run_door_motion_simulator
+from settings import *
 
 def dpir1_callback(state):
     t = time.strftime('%H:%M:%S')
     status = "MOTION" if state else "NO MOTION"
     print(f"[{t}] DPIR1 Door Motion: {status}")
 
-def run_door_motion_sensor(settings, threads, stop_event):
-    delay = settings.get("poll_interval", 2)
+def run_door_motion_sensor(device_settings, threads, stop_event):
+    delay = device_settings.get("poll_interval", 2)
 
-    if settings["simulated"]:
+    if is_simulated(device_settings):
         t = threading.Thread(
             target=run_door_motion_simulator,
             args=(delay, dpir1_callback, stop_event)
@@ -18,7 +19,7 @@ def run_door_motion_sensor(settings, threads, stop_event):
     else:
         print("Starting DPIR1 GPIO sensor")
         from sensors.door_motion_sensor import DoorMotionSensor, run_door_motion_loop
-        sensor = DoorMotionSensor(settings["pin"])
+        sensor = DoorMotionSensor(device_settings["pin"])
         t = threading.Thread(
             target=run_door_motion_loop,
             args=(sensor, delay, dpir1_callback, stop_event)

@@ -1,32 +1,39 @@
 {
-    "DS1": {
-        "simulated": true,
-        "pin": 17,
-        "poll_interval": 20
+    "system": {
+        "pi_id": "PI1",
+        "device_name": "FrontDoorSystem",
+        "location": "Entrance"
     },
-    "DB": {
-        "simulated": true,
-        "pin": 27,
-        "active_high": true
-    },
-    "DUS1": {
-        "simulated": true,
-        "poll_interval": 20
-    },
-    "DL": {
-        "simulated": true,
-        "pin": 23
-    },
-    "DPIR1": {
-        "simulated": true,
-        "pin": 24,
-        "poll_interval": 20
-    },
-    "DMS": {
-        "simulated": true,
-        "pin": 23,
-        "poll_interval": 20
+        
+    "devices":{
+        "DS1": {
+            "simulated": true,
+            "pin": 17,
+            "poll_interval": 20
+        },
+        "DB": {
+            "simulated": true,
+            "pin": 27,
+            "active_high": true
+        },
+        "DUS1": {
+            "simulated": true,
+            "poll_interval": 20
+        },
+        "DL": {
+            "simulated": true,
+            "pin": 23
+        },
+        "DPIR1": {
+            "simulated": true,
+            "pin": 24,
+            "poll_interval": 20
+        },
+        "DMS": {
+            "simulated": true,
+            "pin": 23,
+            "poll_interval": 20
+        }
     }
-
 
 }

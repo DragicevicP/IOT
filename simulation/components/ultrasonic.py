@@ -1,15 +1,16 @@
 import threading
 import time
 from simulators.ultrasonic import run_ultrasonic_simulator
+from settings import *
 
 def ultrasonic_callback(distance):
     t = time.strftime('%H:%M:%S')
     print(f"[{t}] DUS1 Distance: {distance} cm")
 
-def run_ultrasonic(settings, threads, stop_event):
-    delay = settings.get("poll_interval", 2)
+def run_ultrasonic(device_settings, threads, stop_event):
+    delay = device_settings.get("poll_interval", 2)
 
-    if settings["simulated"]:
+    if is_simulated(device_settings):
         t = threading.Thread(
             target=run_ultrasonic_simulator,
             args=(delay, ultrasonic_callback, stop_event)
