@@ -12,3 +12,9 @@ def is_simulated(device_settings):
         raise KeyError("Missing 'simulated' field in device settings")
 
     return device_settings["simulated"]
+
+def get_mqtt_settings(settings):
+    if "mqtt" not in settings:
+        raise KeyError("Missing 'mqtt' configuration")
+
+    return settings["mqtt"]

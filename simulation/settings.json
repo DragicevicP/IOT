@@ -4,35 +4,48 @@
         "device_name": "FrontDoorSystem",
         "location": "Entrance"
     },
-        
+
+    "mqtt": {
+        "host": "localhost",
+        "port": 1883,
+        "batch_size": 10,
+        "flush_interval": 5
+    },
+            
     "devices":{
         "DS1": {
+            "id": "DS1",
             "simulated": true,
             "pin": 17,
-            "poll_interval": 20
+            "poll_interval": 2
         },
         "DB": {
+            "id": "DB",
             "simulated": true,
             "pin": 27,
             "active_high": true
         },
         "DUS1": {
+            "id": "DUS1",
             "simulated": true,
-            "poll_interval": 20
+            "poll_interval": 2
         },
         "DL": {
+            "id": "DL",
             "simulated": true,
             "pin": 23
         },
         "DPIR1": {
+            "id": "DPIR1",
             "simulated": true,
             "pin": 24,
-            "poll_interval": 20
+            "poll_interval": 2
         },
         "DMS": {
+            "id": "DMS",
             "simulated": true,
             "pin": 23,
-            "poll_interval": 20
+            "poll_interval": 2
         }
     }
 

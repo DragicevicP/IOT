@@ -1,4 +1,5 @@
 
+import queue
 import threading
 import time
 
@@ -10,6 +11,8 @@ from components.ultrasonic import run_ultrasonic
 from components.led import run_door_light
 from components.door_motion_sensor import run_door_motion_sensor
 from components.door_membrane_switch import run_door_membrane_switch
+from mqtt.mqtt_client import MQTTClient
+from mqtt.batch_sender import MQTTSenderDaemon
 
 
 if __name__ == "__main__":
@@ -21,13 +24,26 @@ if __name__ == "__main__":
     system_info = settings["system"]
     print(f"Starting {system_info['device_name']} on {system_info['pi_id']}")
 
+    mqtt_cfg = get_mqtt_settings(settings)
+    mqtt_client = MQTTClient(mqtt_cfg["host"], mqtt_cfg["port"])
+
+    mqtt_sender = MQTTSenderDaemon(mqtt_client, batch_size=mqtt_cfg.get("batch_size", 10),flush_interval=mqtt_cfg.get("flush_interval", 2.0))
+
+    mqtt_thread = threading.Thread(
+        target=mqtt_sender.run,
+        args=(stop_event,),
+        daemon=True
+    )
+    mqtt_thread.start()
+
     try:
-        run_door_sensor(get_device_settings(settings, "DS1"),threads,stop_event)
-        run_ultrasonic(get_device_settings(settings, "DUS1"), threads, stop_event)
+        run_door_sensor(get_device_settings(settings, "DS1"), threads, stop_event, mqtt_sender, system_info)
+        run_ultrasonic(get_device_settings(settings, "DUS1"), threads, stop_event, mqtt_sender, system_info)
+        run_door_motion_sensor(get_device_settings(settings, "DPIR1"), threads, stop_event, mqtt_sender, system_info)
+        run_door_membrane_switch(get_device_settings(settings, "DMS"), threads, stop_event, mqtt_sender, system_info)
+
         run_door_buzzer(get_device_settings(settings, "DB"), registry, stop_event)
         run_door_light(get_device_settings(settings, "DL"), registry, stop_event)
-        run_door_motion_sensor(get_device_settings(settings, "DPIR1"), threads, stop_event)
-        run_door_membrane_switch(get_device_settings(settings, "DMS"), threads, stop_event)
 
         cli_thread = threading.Thread(
             target=cli_loop,
