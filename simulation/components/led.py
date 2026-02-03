@@ -1,5 +1,7 @@
 import time
 from settings import *
+from mqtt.topics import sensor_topic
+from mqtt.payload import build_payload
 
 
 def _ts():
@@ -16,6 +18,7 @@ def run_door_light(device_settings, registry: dict, stop_event):
         print(f"[{_ts()}] DL ready (GPIO pin={device_settings['pin']})")
     registry["DL"] = led
 
+
 def handle_dl_command(cmd, registry, stop_event):
     light = registry.get("DL")
     if not light:
@@ -30,11 +33,22 @@ def handle_dl_command(cmd, registry, stop_event):
 
     if action == "on":
         light.on()
+        value = 1
         print("DL: ON")
 
     elif action == "off":
         light.off()
+        value = 0
         print("DL: OFF")
 
     else:
-        print("Unknown DL command. Use: dl on | dl off")
+        print("Unknown DL command.")
+        return
+
+    mqtt_sender = registry.get("_mqtt_sender")
+    system_info = registry.get("_system")
+
+    mqtt_sender.put(
+        sensor_topic(system_info["pi_id"], "DL"),
+        build_payload(system_info, "DL", value, True)
+    )

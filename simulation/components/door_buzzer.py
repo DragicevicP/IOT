@@ -1,7 +1,8 @@
 import time
 import threading
 from settings import *
-
+from mqtt.topics import sensor_topic
+from mqtt.payload import build_payload
 def _ts():
     return time.strftime("%H:%M:%S")
 
@@ -23,13 +24,6 @@ def run_door_buzzer(device_settings, registry: dict, stop_event):
     registry["DB"] = buzzer
 
 def handle_db_command(cmd, registry: dict, stop_event):
-    """
-    Komande:
-      db on
-      db off
-    """
-    print("CLI ready. Type: help")
-
     buzzer = registry.get("DB")
     if buzzer is None:
         print("DB not configured.")
@@ -43,12 +37,23 @@ def handle_db_command(cmd, registry: dict, stop_event):
 
     if action == "on":
         buzzer.on()
+        value = 1
         print("DB: ON")
 
     elif action == "off":
         buzzer.off()
+        value = 0
         print("DB: OFF")
-        
+
     else:
         print("Unknown DB command")
+        return
+
+    mqtt_sender = registry.get("_mqtt_sender")
+    system_info = registry.get("_system")
+
+    mqtt_sender.put(
+        sensor_topic(system_info["pi_id"], "DB"),
+        build_payload(system_info, "DB", value, True)
+    )
 

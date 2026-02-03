@@ -29,6 +29,9 @@ if __name__ == "__main__":
 
     mqtt_sender = MQTTSenderDaemon(mqtt_client, batch_size=mqtt_cfg.get("batch_size", 10),flush_interval=mqtt_cfg.get("flush_interval", 2.0))
 
+    registry["_mqtt_sender"] = mqtt_sender
+    registry["_system"] = system_info
+
     mqtt_thread = threading.Thread(
         target=mqtt_sender.run,
         args=(stop_event,),
