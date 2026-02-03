@@ -11,18 +11,16 @@ MQTT_PORT = 1883
 MQTT_TOPIC = "smart_home/#"
 
 INFLUX_URL = "http://localhost:8086"
-INFLUX_TOKEN = "Ur38YdPI8TMb2AtGfqqA1NrVr-T-__1eSKRqXZR4F1_1yZGcnZcRWYFnfoh09hkdtov2XwPtOzUMEyss4pp_Rg=="
-INFLUX_ORG = "iot-org"
+INFLUX_TOKEN = "super-secret-token"
+INFLUX_ORG = "iot"
 INFLUX_BUCKET = "smart_home"
-
-
 influx = InfluxDBClient(
     url=INFLUX_URL,
     token=INFLUX_TOKEN,
     org=INFLUX_ORG
 )
-write_api = influx.write_api()
 
+write_api = influx.write_api()
 mqtt_client = mqtt.Client()
 
 def on_connect(client, userdata, flags, rc):
