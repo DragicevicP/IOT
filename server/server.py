@@ -6,11 +6,11 @@ from influxdb_client import InfluxDBClient, Point, WritePrecision
 from flask import Flask, request, jsonify
 
 
-MQTT_HOST = "localhost"
+MQTT_HOST = "192.168.107.155"
 MQTT_PORT = 1883
 MQTT_TOPIC = "smart_home/#"
 
-INFLUX_URL = "http://localhost:8086"
+INFLUX_URL = "http://192.168.107.155:8086"
 INFLUX_TOKEN = "super-secret-token"
 INFLUX_ORG = "iot"
 INFLUX_BUCKET = "smart_home"
