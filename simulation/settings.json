@@ -32,7 +32,7 @@
         },
         "DL": {
             "id": "DL",
-            "simulated": true,
+            "simulated": false,
             "pin": 23
         },
         "DPIR1": {
