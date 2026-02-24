@@ -6,7 +6,7 @@
     },
 
     "mqtt": {
-        "host": "192.168.107.155",
+        "host": "localhost",
         "port": 1883,
         "batch_size": 10,
         "flush_interval": 5
@@ -32,7 +32,7 @@
         },
         "DL": {
             "id": "DL",
-            "simulated": false,
+            "simulated": true,
             "pin": 23
         },
         "DPIR1": {
@@ -45,6 +45,12 @@
             "id": "DMS",
             "simulated": true,
             "pin": 23,
+            "poll_interval": 2
+        },
+        "DHT3": {
+            "id": "DHT3",
+            "simulated": true,
+            "pin": 4,
             "poll_interval": 2
         }
     }
