@@ -1,5 +1,8 @@
 from components.door_buzzer import handle_db_command
 from components.led import handle_dl_command
+
+from components.kitchen_segment_display import handle_4sd_command
+
 from simulators.door_membrane_switch import push_dms_sequence
 from components.bedroom_rgb import handle_brgb_command
 
@@ -21,6 +24,10 @@ def cli_loop(registry, stop_event):
 
         elif op == "dl":
             handle_dl_command(cmd, registry, stop_event)
+
+
+        elif cmd[0] == "4sd":
+            handle_4sd_command(cmd, registry, stop_event)
 
         elif op == "dms":
             if len(cmd) < 2:
