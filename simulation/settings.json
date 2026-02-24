@@ -6,7 +6,7 @@
     },
 
     "mqtt": {
-        "host": "192.168.107.155",
+        "host": "localhost",
         "port": 1883,
         "batch_size": 10,
         "flush_interval": 5
@@ -37,15 +37,32 @@
         },
         "DPIR1": {
             "id": "DPIR1",
-            "simulated": false,
+            "simulated": true,
             "pin": 17,
             "poll_interval": 2
         },
         "DMS": {
             "id": "DMS",
             "simulated": true,
-            "pin": 23,
+            "poll_interval": 0.05,
+            "rows": [5, 6, 13, 19],
+            "cols": [12, 16, 20, 21],
+            "pin_code": "1234",
+            "max_len": 8
+        },
+        "IR": {
+            "id": "IR",
+            "simulated": true,
+            "pin": 27,
             "poll_interval": 2
+        },
+        "BRGB": {
+            "id": "BRGB",
+            "simulated": true,
+            "red_pin": 12,
+            "green_pin": 13,
+            "blue_pin": 19,
+            "active_high": true
         }
     }
 

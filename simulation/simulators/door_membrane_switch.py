@@ -1,17 +1,24 @@
+from queue import Queue, Empty
 import time
-import random
+
+DMS_QUEUE = Queue()
+
+def push_dms_sequence(seq: str):
+    DMS_QUEUE.put(seq)
 
 def run_dms_simulator(delay, callback, stop_event):
-    state = 0
+    while not stop_event.is_set():
+        try:
+            seq = DMS_QUEUE.get(timeout=0.2) 
+        except Empty:
+            continue
 
-    while True:
-        if random.random() > 0.85:
-            state = 1
-        else:
-            state = 0
+        seq = (seq or "").strip()
+        if not seq:
+            continue
 
-        callback(state)
-
-        time.sleep(delay)
-        if stop_event.is_set():
-            break
+        for ch in seq:
+            if stop_event.is_set():
+                break
+            callback(ch)
+            time.sleep(delay)
