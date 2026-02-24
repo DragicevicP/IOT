@@ -1,16 +1,18 @@
 import RPi.GPIO as GPIO
 import time
 
-class DoorMotionSensor:
-    def __init__(self, pin):
-        GPIO.setmode(GPIO.BCM)  
+
+class InfraredSensor:
+    def __init__(self, pin: int):
+        GPIO.setmode(GPIO.BCM)
         self.pin = pin
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-    def read(self):
+    def read(self) -> int:
         return GPIO.input(self.pin)
 
-def run_door_motion_loop(sensor, delay, callback, stop_event):
+
+def run_infrared_loop(sensor: InfraredSensor, delay: float, callback, stop_event):
     while True:
         state = sensor.read()
         callback(state)

@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 
 class DoorBuzzer:
     def __init__(self, pin: int, active_high: bool = True):
+        GPIO.setmode(GPIO.BCM)  
         self.pin = pin
         self.active_high = active_high
         GPIO.setup(pin, GPIO.OUT)
