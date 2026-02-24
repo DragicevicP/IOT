@@ -3,6 +3,7 @@ import time
 
 class DoorMotionSensor:
     def __init__(self, pin):
+        GPIO.setmode(GPIO.BCM)  
         self.pin = pin
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 

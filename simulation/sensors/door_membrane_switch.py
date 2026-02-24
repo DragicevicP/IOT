@@ -1,8 +1,10 @@
 import RPi.GPIO as GPIO
 import time
 
+#dodati citanje pina sa tastature
 class DoorMembraneSwitch:
     def __init__(self, pin):
+        GPIO.setmode(GPIO.BCM)  
         self.pin = pin
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 

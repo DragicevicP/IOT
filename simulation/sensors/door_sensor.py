@@ -3,11 +3,13 @@ import time
 
 class DoorSensor:
     def __init__(self, pin):
+        GPIO.setmode(GPIO.BCM) 
         self.pin = pin
-        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def read(self):
         return GPIO.input(self.pin)
+        
 
 def run_door_sensor_loop(sensor, delay, callback, stop_event):
     while True:

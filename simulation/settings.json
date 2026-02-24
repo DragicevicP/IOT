@@ -22,7 +22,7 @@
         "DB": {
             "id": "DB",
             "simulated": true,
-            "pin": 27,
+            "pin": 17,
             "active_high": true
         },
         "DUS1": {
@@ -32,13 +32,13 @@
         },
         "DL": {
             "id": "DL",
-            "simulated": false,
+            "simulated": true,
             "pin": 23
         },
         "DPIR1": {
             "id": "DPIR1",
-            "simulated": true,
-            "pin": 24,
+            "simulated": false,
+            "pin": 17,
             "poll_interval": 2
         },
         "DMS": {
