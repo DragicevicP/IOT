@@ -52,6 +52,12 @@
             "simulated": true,
             "pin": 4,
             "poll_interval": 2
+        },
+        "4SD": {
+            "id": "4SD",
+            "simulated": true,
+            "segments": [11,4,23,8,7,10,18,25],
+            "digits": [22,27,17,24]
         }
     }
 

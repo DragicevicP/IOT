@@ -1,6 +1,6 @@
 from components.door_buzzer import handle_db_command
 from components.led import handle_dl_command
-
+from components.kitchen_segment_display import handle_4sd_command
 def cli_loop(registry, stop_event):
     while not stop_event.is_set():
         line = input("> ").strip().lower()
@@ -18,6 +18,9 @@ def cli_loop(registry, stop_event):
 
         elif cmd[0] == "dl":
             handle_dl_command(cmd, registry, stop_event)
+
+        elif cmd[0] == "4sd":
+            handle_4sd_command(cmd, registry, stop_event)
 
         else:
             print("Unknown command")

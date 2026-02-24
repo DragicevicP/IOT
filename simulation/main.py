@@ -12,6 +12,7 @@ from components.led import run_door_light
 from components.door_motion_sensor import run_door_motion_sensor
 from components.door_membrane_switch import run_door_membrane_switch
 from components.kitchen_dht import run_kitchen_dht
+from components.kitchen_segment_display import run_four_digit_display
 from mqtt.mqtt_client import MQTTClient
 from mqtt.batch_sender import MQTTSenderDaemon
 
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         run_door_light(get_device_settings(settings, "DL"), registry, stop_event)
 
         run_kitchen_dht(get_device_settings(settings, "DHT3"), threads, stop_event, mqtt_sender, system_info)
-
+        run_four_digit_display(get_device_settings(settings, "4SD"), registry, stop_event)
         cli_thread = threading.Thread(
             target=cli_loop,
             args=(registry, stop_event),
