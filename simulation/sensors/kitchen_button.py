@@ -1,0 +1,20 @@
+# sensors/kitchen_button.py
+import RPi.GPIO as GPIO
+import time
+
+class KitchenButton:
+    def __init__(self, pin):
+        self.pin = pin
+        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    def read(self):
+        return GPIO.input(self.pin)
+
+
+def run_kitchen_button_loop(sensor, delay, callback, stop_event):
+    while True:
+        state = sensor.read()
+        callback(state)
+        time.sleep(delay)
+        if stop_event.is_set():
+            break

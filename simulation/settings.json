@@ -58,6 +58,12 @@
             "simulated": true,
             "segments": [11,4,23,8,7,10,18,25],
             "digits": [22,27,17,24]
+        },
+        "BTN": {
+            "id": "BTN",
+            "simulated": true,
+            "pin": 5,
+            "poll_interval": 2
         }
     }
 
