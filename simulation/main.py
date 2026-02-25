@@ -21,6 +21,8 @@ from components.bedroom_rgb import run_bedroom_rgb
 
 from mqtt.mqtt_client import MQTTClient
 from mqtt.batch_sender import MQTTSenderDaemon
+from logic.engine import LogicEngine
+from logic.event_bus import EventBus
 
 
 def parse_args(system_cfg: dict):
@@ -109,8 +111,16 @@ if __name__ == "__main__":
 
     threading.Thread(target=mqtt_sender.run, args=(stop_event,), daemon=True).start()
 
+    event_bus = EventBus()
+    logic_engine = LogicEngine(settings=settings, registry=registry, bus=event_bus)
+    threading.Thread(target=logic_engine.run_loop, args=(stop_event,), daemon=True).start()
+
+
     try:
         # PI1 devices
+        if device_enabled(settings, "DL", chosen):
+            run_door_light(get_device_settings(settings, "DL"), registry, stop_event)
+
         if device_enabled(settings, "DS1", chosen):
             run_door_sensor(get_device_settings(settings, "DS1"), threads, stop_event, mqtt_sender, sys_info)
 
@@ -118,16 +128,13 @@ if __name__ == "__main__":
             run_ultrasonic(get_device_settings(settings, "DUS1"), threads, stop_event, mqtt_sender, sys_info)
 
         if device_enabled(settings, "DPIR1", chosen):
-            run_door_motion_sensor(get_device_settings(settings, "DPIR1"), threads, stop_event, mqtt_sender, sys_info)
+            run_door_motion_sensor(get_device_settings(settings, "DPIR1"), threads, stop_event, mqtt_sender, sys_info, event_bus)
 
         if device_enabled(settings, "DMS", chosen):
             run_door_membrane_switch(get_device_settings(settings, "DMS"), threads, stop_event, mqtt_sender, sys_info)
 
         if device_enabled(settings, "DB", chosen):
             run_door_buzzer(get_device_settings(settings, "DB"), registry, stop_event)
-
-        if device_enabled(settings, "DL", chosen):
-            run_door_light(get_device_settings(settings, "DL"), registry, stop_event)
 
         # PI2 devices
         if device_enabled(settings, "DHT3", chosen):

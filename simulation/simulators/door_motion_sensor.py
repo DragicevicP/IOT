@@ -5,7 +5,7 @@ def run_door_motion_simulator(delay, callback, stop_event):
     state = 0 
 
     while True:
-        if random.random() > 0.8:
+        if random.random() > 0.9:
             state = 1
         else:
             state = 0

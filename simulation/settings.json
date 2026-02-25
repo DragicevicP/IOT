@@ -111,6 +111,11 @@
             "active_high": true,
             "pi_id": "PI3"
         }
+    },
+    "logic": {
+        "motion_light": {
+            "DPIR1": { "light_id": "DL", "duration_sec": 10 }
+        }
     }
 
 }
