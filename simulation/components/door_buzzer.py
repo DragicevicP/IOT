@@ -53,7 +53,7 @@ def handle_db_command(cmd, registry: dict, stop_event):
     system_info = registry.get("_system")
 
     mqtt_sender.put(
-        sensor_topic(system_info["pi_id"], "DB"),
+        sensor_topic(system_info["pi"], "DB"),
         build_payload(system_info, "DB", value, True)
     )
 

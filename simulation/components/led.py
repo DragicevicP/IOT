@@ -49,6 +49,6 @@ def handle_dl_command(cmd, registry, stop_event):
     system_info = registry.get("_system")
 
     mqtt_sender.put(
-        sensor_topic(system_info["pi_id"], "DL"),
+        sensor_topic(system_info["pi"], "DL"),
         build_payload(system_info, "DL", value, True)
     )

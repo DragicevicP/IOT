@@ -13,7 +13,7 @@ def door_sensor_callback(state, system_info, mqtt_sender, device_id, simulated):
 
     payload = build_payload(system_info, device_id, status, simulated)
 
-    topic = sensor_topic(system_info["pi_id"], device_id)
+    topic = sensor_topic(system_info["pi"], device_id)
     mqtt_sender.put(topic, payload)
 
 

@@ -46,6 +46,6 @@ def handle_4sd_command(cmd, registry, stop_event):
     system_info = registry.get("_system")
 
     mqtt_sender.put(
-        sensor_topic(system_info["pi_id"], "4SD"),
+        sensor_topic(system_info["pi"], "4SD"),
         build_payload(system_info, "4SD", value, True)
     )

@@ -77,7 +77,7 @@ def handle_brgb_command(cmd, registry, stop_event):
 
     if mqtt_sender and system_info:
         mqtt_sender.put(
-            sensor_topic(system_info["pi_id"], "BRGB"),
+            sensor_topic(system_info["pi"], "BRGB"),
             build_payload(system_info, "BRGB", value, True)
         )
 

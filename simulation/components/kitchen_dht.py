@@ -22,7 +22,7 @@ def kitchen_dht_callback(data, system_info, mqtt_sender, device_id, simulated):
         print(f"[{t}] {device_id} Kitchen DHT ERROR {value}")
 
     payload = build_payload(system_info, device_id, value, simulated)
-    topic = sensor_topic(system_info["pi_id"], device_id)
+    topic = sensor_topic(system_info["pi"], device_id)
     mqtt_sender.put(topic, payload)
 
 

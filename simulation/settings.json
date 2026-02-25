@@ -1,8 +1,21 @@
 {
     "system": {
-        "pi_id": "PI1",
+    "available_pis": ["PI1", "PI2", "PI3"],
+    "default_run": "PI1",
+    "pis": {
+      "PI1": {
         "device_name": "FrontDoorSystem",
         "location": "Entrance"
+      },
+      "PI2": {
+        "device_name": "KitchenSystem",
+        "location": "Kitchen"
+      },
+      "PI3": {
+        "device_name": "BedroomSystem",
+        "location": "Bedroom"
+      }
+    }
     },
 
     "mqtt": {
@@ -12,34 +25,39 @@
         "flush_interval": 5
     },
             
-    "devices":{
+   "devices": {
         "DS1": {
             "id": "DS1",
             "simulated": true,
             "pin": 17,
-            "poll_interval": 2
+            "poll_interval": 2,
+            "pi_id": "PI1"
         },
         "DB": {
             "id": "DB",
             "simulated": true,
             "pin": 17,
-            "active_high": true
+            "active_high": true,
+            "pi_id": "PI1"
         },
         "DUS1": {
             "id": "DUS1",
             "simulated": true,
-            "poll_interval": 2
+            "poll_interval": 2,
+            "pi_id": "PI1"
         },
         "DL": {
             "id": "DL",
             "simulated": true,
-            "pin": 23
+            "pin": 23,
+            "pi_id": "PI1"
         },
         "DPIR1": {
             "id": "DPIR1",
             "simulated": true,
             "pin": 17,
-            "poll_interval": 2
+            "poll_interval": 2,
+            "pi_id": "PI1"
         },
         "DMS": {
             "id": "DMS",
@@ -48,39 +66,50 @@
             "rows": [5, 6, 13, 19],
             "cols": [12, 16, 20, 21],
             "pin_code": "1234",
-            "max_len": 8
+            "max_len": 8,
+            "pi_id": "PI1"
         },
+
         "IR": {
             "id": "IR",
             "simulated": true,
             "pin": 27,
-            "poll_interval": 2
+            "poll_interval": 2,
+            "pi_id": "PI3"
         },
+
         "DHT3": {
             "id": "DHT3",
             "simulated": true,
             "pin": 4,
-            "poll_interval": 2
+            "poll_interval": 2,
+            "pi_id": "PI2"
         },
+
         "4SD": {
             "id": "4SD",
             "simulated": true,
             "segments": [11,4,23,8,7,10,18,25],
-            "digits": [22,27,17,24]
+            "digits": [22,27,17,24],
+            "pi_id": "PI2"
         },
+
         "BTN": {
             "id": "BTN",
             "simulated": true,
             "pin": 5,
-            "poll_interval": 2
+            "poll_interval": 2,
+            "pi_id": "PI2"
         },
+
         "BRGB": {
             "id": "BRGB",
             "simulated": true,
             "red_pin": 12,
             "green_pin": 13,
             "blue_pin": 19,
-            "active_high": true
+            "active_high": true,
+            "pi_id": "PI3"
         }
     }
 

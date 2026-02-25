@@ -9,7 +9,7 @@ from mqtt.topics import sensor_topic
 def ultrasonic_callback(distance, system_info, mqtt_sender, device_id, simulated):
     payload = build_payload(system_info, device_id, distance, simulated)
 
-    topic = sensor_topic(system_info["pi_id"], device_id)
+    topic = sensor_topic(system_info["pi"], device_id)
     mqtt_sender.put(topic, payload)
 
     t = time.strftime('%H:%M:%S')
