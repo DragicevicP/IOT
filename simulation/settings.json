@@ -69,7 +69,19 @@
             "max_len": 8,
             "pi_id": "PI1"
         },
-
+        "DUS2": {
+            "id": "DUS2",
+            "simulated": true,
+            "poll_interval": 2,
+            "pi_id": "PI2"
+        },
+        "DPIR2": {
+            "id": "DPIR2",
+            "simulated": true,
+            "pin": 16,
+            "poll_interval": 2,
+            "pi_id": "PI2"
+        },
         "IR": {
             "id": "IR",
             "simulated": true,
@@ -101,7 +113,6 @@
             "poll_interval": 2,
             "pi_id": "PI2"
         },
-
         "BRGB": {
             "id": "BRGB",
             "simulated": true,
@@ -111,13 +122,20 @@
             "active_high": true,
             "pi_id": "PI3"
         },
-
         "DS2": {
             "id": "DS2",
             "simulated": true,
             "pin": 6,
             "poll_interval": 2,
             "pi_id": "PI2"
+        },
+        "DPIR3": {
+            "id": "DPIR3",
+            "simulated": true,
+            "pin": 26,
+            "poll_interval": 2,
+            "pi_id": "PI3"
+
         }
     },
     "logic": {
@@ -127,6 +145,20 @@
         "door_unlock_alarm": {
             "DS1": { "duration_sec": 5, "buzzer_id": "DB" },
             "DS2": { "duration_sec": 5, "buzzer_id": "DB" }
+        },
+        "people_counter": {
+            "window_sec": 10,
+            "min_samples": 3,
+            "delta_cm_threshold": 12,
+            "cooldown_sec": 3,
+            "pairs": {
+            "DPIR1": { "dus_id": "DUS1", "approach_means": "ENTER" },
+            "DPIR2": { "dus_id": "DUS2", "approach_means": "ENTER" }
+            },
+            "publish_device_id": "PEOPLE_COUNT"
+        },
+        "alarm_when_empty": {
+            "pir_ids": ["DPIR1", "DPIR2", "DPIR3"]
         }
     }
 

@@ -1,6 +1,6 @@
 # logic/engine.py
 import time
-from typing import Dict, Optional
+from typing import Dict, Optional, Deque, Tuple
 from logic.event_bus import EventBus
 from logic.events import DeviceEvent
 from components.led import publish_dl_state
@@ -8,17 +8,18 @@ from mqtt.topics import sensor_topic
 from mqtt.payload import build_payload
 from logic.events import DeviceEvent, PinEvent
 import queue
+from collections import deque
+
+
 class LogicEngine:
     def __init__(self, settings: dict, registry: dict, bus: EventBus):
         self.settings = settings
         self.registry = registry
         self.bus = bus
+        logic_cfg = settings.get("logic", {})
 
-        self.motion_light_rules: Dict[str, dict] = (
-            settings.get("logic", {})
-                    .get("motion_light", {})
-        )
-        self._last_motion_state: Dict[str, int] = {}
+        self.motion_light_rules: Dict[str, dict] = logic_cfg.get("motion_light", {})
+        self._last_motion_state_light: Dict[str, int] = {}
         self._light_off_at: Dict[str, float] = {}
         self.door_unlock_rules = (
             settings.get("logic", {})
@@ -29,6 +30,28 @@ class LogicEngine:
         self.alarm_pin = str(settings["devices"]["DMS"]["pin_code"])
 
 
+        people_cfg = logic_cfg.get("people_counter", {})
+        self.people_pairs: Dict[str, dict] = people_cfg.get("pairs", {})
+        self.window_sec = float(people_cfg.get("window_sec", 4))
+        self.min_samples = int(people_cfg.get("min_samples", 4))
+        self.delta_threshold = float(people_cfg.get("delta_cm_threshold", 20))
+        self.cooldown_sec = float(people_cfg.get("cooldown_sec", 3))
+        self.publish_device_id = people_cfg.get("publish_device_id", "PEOPLE_COUNT")
+
+        self.persons_count = 0
+        self._last_motion_state_people: Dict[str, int] = {}
+        self._last_count_ts: Dict[str, float] = {}
+        self._dus_history: Dict[str, Deque[Tuple[float, float]]] = {}
+        self._dus_maxlen = 200
+
+        self._debug_people_delta = bool(people_cfg.get("debug", False))
+
+        self._alarm_on = False
+        alarm_cfg = logic_cfg.get("alarm_when_empty", {})
+        self.alarm_pirs = set(alarm_cfg.get("pir_ids", ["DPIR1", "DPIR2", "DPIR3"]))
+        self._last_motion_state_alarm: Dict[str, int] = {}
+
+
     def _truthy_motion(self, value) -> int:
         return 1 if bool(value) else 0
 
@@ -37,23 +60,47 @@ class LogicEngine:
         if not light:
             print(f"[LOGIC] Light '{light_id}' not found in registry")
             return
-        try:
-            light.on()
-            if light_id == "DL":
-                publish_dl_state(self.registry, 1)
-        except Exception as e:
-            print(f"[LOGIC] Failed to turn ON {light_id}: {e}")
+        light.on()
+        if light_id == "DL":
+            publish_dl_state(self.registry, 1)
 
     def _turn_light_off(self, light_id: str):
         light = self.registry.get(light_id)
         if not light:
             return
-        try:
-            light.off()
-            if light_id == "DL":
-                publish_dl_state(self.registry, 0)
-        except Exception as e:
-            print(f"[LOGIC] Failed to turn OFF {light_id}: {e}")
+        light.off()
+        if light_id == "DL":
+            publish_dl_state(self.registry, 0)
+
+    def _publish_people_count(self, system_info: dict, simulated: bool):
+        mqtt_sender = self.registry.get("_mqtt_sender")
+        if not mqtt_sender:
+            return
+        topic = sensor_topic(system_info["pi"], self.publish_device_id)
+        payload = build_payload(system_info, self.publish_device_id, self.persons_count, simulated)
+        mqtt_sender.put(topic, payload)
+    
+    def _save_alarm_state(self, is_on: bool):
+        sender = self.registry.get("_mqtt_sender")
+        sys_info = self.registry.get("_system")
+        if not sender or not sys_info:
+            return
+
+        sender.put(
+            sensor_topic(sys_info["pi"], "ALARM"),
+            build_payload(sys_info, "ALARM", bool(is_on), True)
+        )
+
+    def _store_dus(self, dus_id: str, distance: float):
+        now = time.time()
+        dq = self._dus_history.get(dus_id)
+        if dq is None:
+            dq = deque(maxlen=self._dus_maxlen)
+            self._dus_history[dus_id] = dq
+
+        dq.append((now, float(distance)))
+        while dq and (now - dq[0][0] > self.window_sec):
+            dq.popleft()
 
     def _handle_motion_light(self, ev: DeviceEvent):
         rule = self.motion_light_rules.get(ev.device_id)
@@ -61,8 +108,9 @@ class LogicEngine:
             return
 
         motion = self._truthy_motion(ev.value)
-        prev = self._last_motion_state.get(ev.device_id, 0)
-        self._last_motion_state[ev.device_id] = motion
+        prev = self._last_motion_state_light.get(ev.device_id, 0)
+        self._last_motion_state_light[ev.device_id] = motion
+
         if prev == 0 and motion == 1:
             light_id = rule.get("light_id", "DL")
             duration = float(rule.get("duration_sec", 10))
@@ -70,6 +118,93 @@ class LogicEngine:
             print(f"[LOGIC] {ev.device_id} motion -> {light_id} ON for {duration}s")
             self._turn_light_on(light_id)
             self._light_off_at[light_id] = time.time() + duration
+
+    def _handle_people_counter(self, ev: DeviceEvent):
+       
+        if ev.device_id.startswith("DUS"):
+            self._store_dus(ev.device_id, ev.value)
+            return
+
+        cfg = self.people_pairs.get(ev.device_id)
+        if not cfg:
+            return
+
+        motion = self._truthy_motion(ev.value)
+        prev = self._last_motion_state_people.get(ev.device_id, 0)
+        self._last_motion_state_people[ev.device_id] = motion
+
+        if not (prev == 0 and motion == 1):
+            return
+
+        now = time.time()
+        last_ts = self._last_count_ts.get(ev.device_id, 0.0)
+        if now - last_ts < self.cooldown_sec:
+            return
+
+        dus_id = cfg["dus_id"]
+        approach_means = cfg.get("approach_means", "ENTER") 
+
+        hist = list(self._dus_history.get(dus_id, []))
+        if len(hist) < self.min_samples:
+            print(f"[PEOPLE] {ev.device_id}: not enough {dus_id} samples ({len(hist)}/{self.min_samples})")
+            return
+
+        distances = [d for _, d in hist]
+        mid = len(distances) // 2
+        before = distances[:mid]
+        after = distances[mid:]
+
+        if not before or not after:
+            return
+
+        avg_before = sum(before) / len(before)
+        avg_after = sum(after) / len(after)
+        delta = avg_after - avg_before
+
+        if self._debug_people_delta:
+            print(f"[PEOPLE-DBG] {ev.device_id}/{dus_id} before={avg_before:.1f} after={avg_after:.1f} delta={delta:.1f}")
+
+        if delta < -self.delta_threshold:
+            direction = "APPROACH"
+        elif delta > self.delta_threshold:
+            direction = "LEAVE"
+        else:
+            return
+
+        if direction == "APPROACH":
+            action = approach_means
+        else:
+            action = "EXIT" if approach_means == "ENTER" else "ENTER"
+
+        old = self.persons_count
+        if action == "ENTER":
+            self.persons_count += 1
+        else:
+            self.persons_count = max(0, self.persons_count - 1)
+
+        if self.persons_count != old:
+            self._last_count_ts[ev.device_id] = now
+            print(f"[PEOPLE] {action} -> persons {old} -> {self.persons_count}")
+            self._publish_people_count(ev.system_info, ev.simulated)
+    
+    def _handle_alarm_when_empty(self, ev: DeviceEvent):
+        if ev.device_id not in self.alarm_pirs:
+            return
+
+        motion = self._truthy_motion(ev.value)
+        prev = self._last_motion_state_alarm.get(ev.device_id, 0)
+        self._last_motion_state_alarm[ev.device_id] = motion
+
+        if not (prev == 0 and motion == 1):
+            return
+
+        if self.persons_count != 0:
+            return
+
+        if not self._alarm_on:
+            self._alarm_on = True
+            print(f"[ALARM] ON (empty + motion on {ev.device_id})")
+            self._save_alarm_state(True)
 
     def _process_scheduled(self):
         now = time.time()
@@ -88,7 +223,6 @@ class LogicEngine:
             except queue.Empty:
                 continue
 
-
             if isinstance(ev, PinEvent):
                 self._handle_pin_event(ev)
                 continue
@@ -96,6 +230,9 @@ class LogicEngine:
             
             self._handle_motion_light(ev)
             self._handle_door_unlock_alarm(ev)
+            self._handle_alarm_when_empty(ev)
+            self._handle_people_counter(ev)
+
 
     def _save_alarm_state(self, is_on: bool):
         sender = self.registry.get("_mqtt_sender")
@@ -164,3 +301,4 @@ class LogicEngine:
             self._door_open_since.clear()
             self._set_buzzer("DB", False)
             self._save_alarm_state(False)
+
