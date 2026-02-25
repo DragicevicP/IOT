@@ -154,6 +154,13 @@
             "cols": 16,
             "rows": 2,
             "i2c_addr": "0x27"
+        },
+        "GSG": {
+            "id": "GSG",
+            "simulated": true,
+            "poll_interval": 2,
+            "threshold_g": 0.35,
+            "pi_id": "PI2"
         }
     },
     "logic": {

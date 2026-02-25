@@ -277,8 +277,10 @@ class LogicEngine:
             
             self._handle_motion_light(ev)
             self._handle_door_unlock_alarm(ev)
+
             self._handle_alarm_when_empty(ev)
             self._handle_people_counter(ev)
+            self._handle_gsg_alarm(ev)
 
 
     def _save_alarm_state(self, is_on: bool):
@@ -294,16 +296,37 @@ class LogicEngine:
 
     def _set_buzzer(self, buzzer_id: str, on: bool):
         buzzer = self.registry.get(buzzer_id)
-        if not buzzer:
-            print(f"[LOGIC] Buzzer '{buzzer_id}' not found in registry")
+
+        # LOCAL buzzer (isti PI)
+        if buzzer:
+            try:
+                buzzer.on() if on else buzzer.off()
+                return
+            except Exception as e:
+                print(f"[LOGIC] Failed to set local buzzer {buzzer_id}: {e}")
+                return
+
+        # REMOTE buzzer (drugi PI preko MQTT)
+        sender = self.registry.get("_mqtt_sender")
+        sys_info = self.registry.get("_system")
+
+        if not sender or not sys_info:
+            print("[LOGIC] MQTT sender missing")
             return
-        try:
-            if on:
-                buzzer.on()
-            else:
-                buzzer.off()
-        except Exception as e:
-            print(f"[LOGIC] Failed to set buzzer {buzzer_id}={on}: {e}")
+
+        # BUZZER JE NA PI1 — hardcoded ili iz settings
+        target_pi = "PI1"
+
+        payload = {
+            "pi_id": target_pi,
+            "device_id": buzzer_id,
+            "command": "ON" if on else "OFF"
+        }
+
+        topic = f"smart_home/{target_pi}/{buzzer_id}/cmd"
+        sender.put(topic, payload)
+
+        print(f"[LOGIC] Remote buzzer {buzzer_id} -> {payload['command']} ({target_pi})")
 
     def _handle_door_unlock_alarm(self, ev: DeviceEvent):
         rule = self.door_unlock_rules.get(ev.device_id)
@@ -349,8 +372,19 @@ class LogicEngine:
             self._set_buzzer("DB", False)
             self._save_alarm_state(False)
 
+
     def _handle_dht_for_lcd(self, ev: DeviceEvent):
         if ev.device_id not in self.lcd_dht_ids:
             return
         if isinstance(ev.value, dict):
             self._last_dht_data[ev.device_id] = ev.value
+
+    def _handle_gsg_alarm(self, ev: DeviceEvent):
+        if ev.device_id != "GSG":
+            return
+        if int(bool(ev.value)) == 1 and not self._alarm_on:
+            print("[LOGIC] ALARM ON: GSG significant movement")
+            self._alarm_on = True
+            self._set_buzzer("DB", True)
+            self._save_alarm_state(True)
+

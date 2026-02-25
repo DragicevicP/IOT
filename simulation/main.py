@@ -18,6 +18,7 @@ from components.kitchen_button import run_kitchen_button
 from components.lcd import run_lcd
 from components.infrared import run_infrared
 from components.bedroom_rgb import run_bedroom_rgb
+from components.gsg import run_gsg
 
 from mqtt.mqtt_client import MQTTClient
 from mqtt.batch_sender import MQTTSenderDaemon
@@ -155,6 +156,9 @@ if __name__ == "__main__":
 
         if device_enabled(settings, "BTN", chosen):
             run_kitchen_button(get_device_settings(settings, "BTN"), threads, stop_event, mqtt_sender, sys_info)
+
+        if device_enabled(settings, "GSG", chosen):
+            run_gsg(get_device_settings(settings, "GSG"), threads, stop_event, mqtt_sender, sys_info, event_bus)
 
         # PI3 devices
         if device_enabled(settings, "DHT1", chosen):
