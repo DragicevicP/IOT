@@ -12,3 +12,9 @@ class DeviceEvent:
 
 def now_ts() -> float:
     return time.time()
+
+@dataclass
+class PinEvent:
+    source_id: str   
+    pin: str
+    timestamp: int

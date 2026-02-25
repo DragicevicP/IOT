@@ -110,11 +110,23 @@
             "blue_pin": 19,
             "active_high": true,
             "pi_id": "PI3"
+        },
+
+        "DS2": {
+            "id": "DS2",
+            "simulated": true,
+            "pin": 6,
+            "poll_interval": 2,
+            "pi_id": "PI2"
         }
     },
     "logic": {
         "motion_light": {
             "DPIR1": { "light_id": "DL", "duration_sec": 10 }
+        },
+        "door_unlock_alarm": {
+            "DS1": { "duration_sec": 5, "buzzer_id": "DB" },
+            "DS2": { "duration_sec": 5, "buzzer_id": "DB" }
         }
     }
 
