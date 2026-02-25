@@ -38,6 +38,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=iot
       - GF_SECURITY_ADMIN_PASSWORD=mladenpetric
+
+    
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
     depends_on:
       - influxdb
     restart: unless-stopped

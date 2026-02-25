@@ -15,7 +15,7 @@ from components.door_membrane_switch import run_door_membrane_switch
 from components.kitchen_dht import run_kitchen_dht
 from components.kitchen_segment_display import run_four_digit_display
 from components.kitchen_button import run_kitchen_button
-
+from components.lcd import run_lcd
 from components.infrared import run_infrared
 from components.bedroom_rgb import run_bedroom_rgb
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             run_door_motion_sensor(get_device_settings(settings, "DPIR2"), threads, stop_event, mqtt_sender, sys_info, event_bus)
 
         if device_enabled(settings, "DHT3", chosen):
-            run_kitchen_dht(get_device_settings(settings, "DHT3"), threads, stop_event, mqtt_sender, sys_info)
+            run_kitchen_dht(get_device_settings(settings, "DHT3"), threads, stop_event, mqtt_sender, sys_info, event_bus)
 
         if device_enabled(settings, "4SD", chosen):
             run_four_digit_display(get_device_settings(settings, "4SD"), registry, stop_event)
@@ -157,6 +157,12 @@ if __name__ == "__main__":
             run_kitchen_button(get_device_settings(settings, "BTN"), threads, stop_event, mqtt_sender, sys_info)
 
         # PI3 devices
+        if device_enabled(settings, "DHT1", chosen):
+            run_kitchen_dht(get_device_settings(settings, "DHT1"), threads, stop_event, mqtt_sender, sys_info, event_bus)
+
+        if device_enabled(settings, "DHT2", chosen):
+            run_kitchen_dht(get_device_settings(settings, "DHT2"), threads, stop_event, mqtt_sender, sys_info, event_bus)
+
         if device_enabled(settings, "IR", chosen):
             run_infrared(get_device_settings(settings, "IR"), threads, stop_event, mqtt_sender, sys_info)
 
@@ -166,6 +172,8 @@ if __name__ == "__main__":
         if device_enabled(settings, "DPIR3", chosen):
             run_door_motion_sensor(get_device_settings(settings, "DPIR3"), threads, stop_event, mqtt_sender, sys_info, event_bus)
 
+        if device_enabled(settings, "LCD", chosen):
+            run_lcd(get_device_settings(settings, "LCD"), registry, stop_event)
 
         threading.Thread(target=cli_loop, args=(registry, stop_event), daemon=True).start()
 

@@ -89,7 +89,20 @@
             "poll_interval": 2,
             "pi_id": "PI3"
         },
-
+        "DHT1": { 
+            "id": "DHT1", 
+            "simulated": true, 
+            "pin": 4,  
+            "poll_interval": 2, 
+            "pi_id": "PI3" 
+        },
+        "DHT2": { 
+            "id": "DHT2", 
+            "simulated": true, 
+            "pin": 17, 
+            "poll_interval": 2, 
+            "pi_id": "PI3" 
+        },
         "DHT3": {
             "id": "DHT3",
             "simulated": true,
@@ -97,7 +110,6 @@
             "poll_interval": 2,
             "pi_id": "PI2"
         },
-
         "4SD": {
             "id": "4SD",
             "simulated": true,
@@ -105,7 +117,6 @@
             "digits": [22,27,17,24],
             "pi_id": "PI2"
         },
-
         "BTN": {
             "id": "BTN",
             "simulated": true,
@@ -135,7 +146,14 @@
             "pin": 26,
             "poll_interval": 2,
             "pi_id": "PI3"
-
+        },
+        "LCD": {
+            "id": "LCD",
+            "simulated": true,
+            "pi_id": "PI2",
+            "cols": 16,
+            "rows": 2,
+            "i2c_addr": "0x27"
         }
     },
     "logic": {
@@ -159,6 +177,12 @@
         },
         "alarm_when_empty": {
             "pir_ids": ["DPIR1", "DPIR2", "DPIR3"]
+        },
+        "lcd_rotate_dht": {
+            "enabled": true,
+            "lcd_id": "LCD",
+            "dht_ids": ["DHT1", "DHT2", "DHT3"],
+            "interval_sec": 3
         }
     }
 

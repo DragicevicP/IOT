@@ -51,6 +51,16 @@ class LogicEngine:
         self.alarm_pirs = set(alarm_cfg.get("pir_ids", ["DPIR1", "DPIR2", "DPIR3"]))
         self._last_motion_state_alarm: Dict[str, int] = {}
 
+        lcd_cfg = logic_cfg.get("lcd_rotate_dht", {})
+        self.lcd_rotate_enabled = bool(lcd_cfg.get("enabled", False))
+        self.lcd_id = lcd_cfg.get("lcd_id", "LCD")
+        self.lcd_dht_ids = list(lcd_cfg.get("dht_ids", ["DHT1", "DHT2", "DHT3"]))
+        self.lcd_interval_sec = float(lcd_cfg.get("interval_sec", 3))
+
+        self._lcd_next_at = time.time() + self.lcd_interval_sec
+        self._lcd_idx = 0
+        self._last_dht_data = {} 
+
 
     def _truthy_motion(self, value) -> int:
         return 1 if bool(value) else 0
@@ -213,6 +223,41 @@ class LogicEngine:
             print(f"[LOGIC] {lid} OFF (timer)")
             self._turn_light_off(lid)
             del self._light_off_at[lid]
+        
+        if self.lcd_rotate_enabled and time.time() >= self._lcd_next_at:
+            self._lcd_next_at = time.time() + self.lcd_interval_sec
+
+            lcd = self.registry.get(self.lcd_id)
+            if not lcd:
+                return
+
+            dht_id = self.lcd_dht_ids[self._lcd_idx % len(self.lcd_dht_ids)]
+            self._lcd_idx += 1
+
+            data = self._last_dht_data.get(dht_id)
+            if not data or not data.get("ok"):
+                line1 = f"{dht_id}"
+                line2 = "NO DATA/ERR"
+            else:
+                t = data.get("temperature")
+                h = data.get("humidity")
+                line1 = f"{dht_id}  T:{t}C"
+                line2 = f"H:{h}%"
+
+            try:
+                lcd.write_lines(line1, line2)
+            except Exception as e:
+                print(f"[LCD] write failed: {e}")
+                return
+
+            sender = self.registry.get("_mqtt_sender")
+            sys_info = self.registry.get("_system")
+            if sender and sys_info:
+                sender.put(
+                    sensor_topic(sys_info["pi"], self.lcd_id),
+                    build_payload(sys_info, self.lcd_id, f"{line1} | {line2}", True)
+                )
+
 
     def run_loop(self, stop_event):
         while not stop_event.is_set():
@@ -227,6 +272,8 @@ class LogicEngine:
                 self._handle_pin_event(ev)
                 continue
 
+            if self.lcd_rotate_enabled:
+                self._handle_dht_for_lcd(ev)
             
             self._handle_motion_light(ev)
             self._handle_door_unlock_alarm(ev)
@@ -302,3 +349,8 @@ class LogicEngine:
             self._set_buzzer("DB", False)
             self._save_alarm_state(False)
 
+    def _handle_dht_for_lcd(self, ev: DeviceEvent):
+        if ev.device_id not in self.lcd_dht_ids:
+            return
+        if isinstance(ev.value, dict):
+            self._last_dht_data[ev.device_id] = ev.value
