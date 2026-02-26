@@ -293,6 +293,7 @@ class LogicEngine:
             sensor_topic(sys_info["pi"], "ALARM"),
             build_payload(sys_info, "ALARM", bool(is_on), True)
         )
+        self.registry["_alarm_on"] = bool(is_on)
 
     def _set_buzzer(self, buzzer_id: str, on: bool):
         buzzer = self.registry.get(buzzer_id)

@@ -1,11 +1,57 @@
 <div class="container">
   <h1 class="title">SMART HOME</h1>
 
+  <button class="alarm-banner" *ngIf="alarmOn">ALARM</button>
+
+  <div class="controls">
+    <div class="card">
+      <div class="label">PIN (DMS)</div>
+      <div class="row">
+        <input
+          type="password"
+          inputmode="numeric"
+          placeholder="PIN"
+          [(ngModel)]="pin"
+        />
+        <button  class="send-btn" (click)="sendPin()">Send</button>
+      </div>
+      <div class="hint" *ngIf="pinStatus">{{ pinStatus }}</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Bedroom RGB (BRGB)</div>
+      <div class="colors">
+        <button class="color-btn red" (click)="setColor('red')">Red</button>
+        <button class="color-btn green" (click)="setColor('green')">Green</button>
+        <button class="color-btn blue" (click)="setColor('blue')">Blue</button>
+        <button class="color-btn yellow" (click)="setColor('yellow')">Yellow</button>
+        <button class="color-btn purple" (click)="setColor('purple')">Purple</button>
+        <button class="color-btn white" (click)="setColor('white')">White</button>
+        <button class="color-btn off" (click)="setColor('off')">Off</button>
+      </div>
+      <div class="hint" *ngIf="colorStatus">{{ colorStatus }}</div>
+    </div>
+
+    <div class="card">
+      <div class="label">4SD Timer</div>
+
+        <div class="row">
+          <input
+            class="timer-input"
+            type="text"
+            placeholder="HH:MM"
+            [(ngModel)]="timer"
+          />
+          <button class="now-btn" (click)="set4sdNow()">Now</button>
+          <button class="send-btn" (click)="set4sd()">Set</button>
+        </div>
+
+        <div class="hint" *ngIf="timerStatus">{{ timerStatus }}</div>
+    </div>
+
+  </div>
+
   <div class="dashboard-container">
-    <iframe
-      [src]="grafanaUrl"
-      frameborder="0"
-      allowfullscreen>
-    </iframe>
+    <iframe [src]="grafanaUrl"frameborder="0"allowfullscreen></iframe>
   </div>
 </div>

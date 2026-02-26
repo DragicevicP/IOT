@@ -24,7 +24,7 @@ from mqtt.mqtt_client import MQTTClient
 from mqtt.batch_sender import MQTTSenderDaemon
 from logic.engine import LogicEngine
 from logic.event_bus import EventBus
-
+from api.http_api import start_http_api
 
 def parse_args(system_cfg: dict):
     default_pi = system_cfg.get("default_run", "PI1")
@@ -179,6 +179,7 @@ if __name__ == "__main__":
         if device_enabled(settings, "LCD", chosen):
             run_lcd(get_device_settings(settings, "LCD"), registry, stop_event)
 
+        threading.Thread(target=start_http_api, args=(settings, registry, event_bus, stop_event), daemon=True).start()
         threading.Thread(target=cli_loop, args=(registry, stop_event), daemon=True).start()
 
         while not stop_event.is_set():

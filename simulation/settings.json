@@ -150,7 +150,7 @@
         "LCD": {
             "id": "LCD",
             "simulated": true,
-            "pi_id": "PI2",
+            "pi_id": "PI3",
             "cols": 16,
             "rows": 2,
             "i2c_addr": "0x27"
