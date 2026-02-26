@@ -1,5 +1,6 @@
 import threading
 from flask import Flask, request, jsonify
+from simulators.door_membrane_switch import push_dms_sequence
 
 def start_http_api(settings, registry, event_bus, stop_event, host="0.0.0.0", port=5001):
     app = Flask(__name__)
@@ -52,29 +53,19 @@ def start_http_api(settings, registry, event_bus, stop_event, host="0.0.0.0", po
 
         data = request.get_json(silent=True) or {}
         pin = str(data.get("pin", "")).strip()
-        if pin.endswith("#"):
-            pin = pin[:-1]
 
+        if not pin:
+            return jsonify({"ok": False, "error": "empty_pin"}), 400
+
+        raw_pin = pin[:-1] if pin.endswith("#") else pin
+        seq = raw_pin + "#"
         dms_cfg = (settings.get("devices", {}).get("DMS", {}) or {})
         expected = str(dms_cfg.get("pin_code", "1234")).strip()
-        ok = (pin == expected)
+        pin_ok = (raw_pin == expected)
 
-        if ok and event_bus is not None:
-            from logic.events import PinEvent, now_ts
-            event_bus.publish(PinEvent(source_id="DMS", pin=pin, timestamp=now_ts()))
+        threading.Thread(target=push_dms_sequence, args=(seq,), daemon=True).start()
 
-        mqtt_sender = registry.get("_mqtt_sender")
-        system_info = registry.get("_system")
-        if mqtt_sender and system_info:
-            from mqtt.topics import sensor_topic
-            from mqtt.payload import build_payload
-            status = "PIN_OK" if ok else "PIN_BAD"
-            mqtt_sender.put(
-                sensor_topic(system_info["pi"], "DMS"),
-                build_payload(system_info, "DMS", status, True)
-            )
-
-        return jsonify({"ok": True, "pin_ok": ok})
+        return jsonify({"ok": True, "sent": seq, "pin_ok": pin_ok})
 
     @app.route("/api/brgb/color", methods=["POST", "OPTIONS"])
     def brgb_color():

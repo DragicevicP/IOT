@@ -328,14 +328,25 @@ class LogicEngine:
     def _set_buzzer(self, buzzer_id: str, on: bool):
         buzzer = self.registry.get(buzzer_id)
 
-        # LOCAL buzzer (isti PI)
         if buzzer:
             try:
                 buzzer.on() if on else buzzer.off()
-                return
             except Exception as e:
                 print(f"[LOGIC] Failed to set local buzzer {buzzer_id}: {e}")
                 return
+
+            sender = self.registry.get("_mqtt_sender")
+            sys_info = self.registry.get("_system")
+            if sender and sys_info:
+                value = 1 if on else 0
+                simulated = bool(self.settings.get("devices", {}).get(buzzer_id, {}).get("simulated", True))
+
+                sender.put(
+                    sensor_topic(sys_info["pi"], buzzer_id),
+                    build_payload(sys_info, buzzer_id, value, simulated)
+                )
+
+            return
 
         # REMOTE buzzer (drugi PI preko MQTT)
         sender = self.registry.get("_mqtt_sender")
