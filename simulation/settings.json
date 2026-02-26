@@ -190,6 +190,13 @@
             "lcd_id": "LCD",
             "dht_ids": ["DHT1", "DHT2", "DHT3"],
             "interval_sec": 3
+        },
+        "security": {
+            "keypad_id": "DMS",
+            "door_ids": ["DS1", "DS2"],
+            "buzzer_id": "DB",
+            "arm_delay_sec": 10,
+            "entry_delay_sec": 10
         }
     }
 

@@ -61,6 +61,20 @@ class LogicEngine:
         self._lcd_idx = 0
         self._last_dht_data = {} 
 
+        self._armed = False
+        self._arming_until = 0.0
+        self._entry_until = 0.0
+        self._waiting_entry_pin = False
+
+        # --- SECURITY CONFIG ---
+        sec_cfg = logic_cfg.get("security", {})
+
+        self.security_enabled = bool(sec_cfg)
+        self.security_keypad_id = sec_cfg.get("keypad_id", "DMS")
+        self.security_doors = set(sec_cfg.get("door_ids", ["DS1", "DS2"]))
+        self.security_buzzer_id = sec_cfg.get("buzzer_id", "DB")
+        self.arm_delay_sec = float(sec_cfg.get("arm_delay_sec", 10))
+        self.entry_delay_sec = float(sec_cfg.get("entry_delay_sec", 0))
 
     def _truthy_motion(self, value) -> int:
         return 1 if bool(value) else 0
@@ -218,6 +232,22 @@ class LogicEngine:
 
     def _process_scheduled(self):
         now = time.time()
+
+        # ARMING -> ARMED posle 10s
+        if self.security_enabled and (not self._armed) and self._arming_until and now >= self._arming_until:
+            self._arming_until = 0.0
+            self._armed = True
+            self.registry["_system_on"] = bool(self._armed)
+            print("[SEC] ARMED")
+
+        # ENTRY window istekao -> ALARM ON
+        # if self.security_enabled and self._armed and self._waiting_entry_pin and (not self._alarm_on) and now >= self._entry_until:
+        #     self._waiting_entry_pin = False
+        #     self._alarm_on = True
+        #     print("[SEC] ALARM ON (entry timeout)")
+        #     self._set_buzzer(self.security_buzzer_id, True)
+        #     self._save_alarm_state(True)
+
         to_off = [lid for lid, ts in self._light_off_at.items() if ts <= now]
         for lid in to_off:
             print(f"[LOGIC] {lid} OFF (timer)")
@@ -281,7 +311,7 @@ class LogicEngine:
             self._handle_alarm_when_empty(ev)
             self._handle_people_counter(ev)
             self._handle_gsg_alarm(ev)
-
+            self._handle_security_doors(ev)
 
     def _save_alarm_state(self, is_on: bool):
         sender = self.registry.get("_mqtt_sender")
@@ -360,19 +390,39 @@ class LogicEngine:
 
                 self._set_buzzer(buzzer_id, False)
                 self._save_alarm_state(False)  
-    
+
     def _handle_pin_event(self, ev: "PinEvent"):
         if ev.pin != self.alarm_pin:
             print("[LOGIC] Wrong PIN")
             return
 
+        now = time.time()
+
         if self._alarm_on:
-            print("[LOGIC] PIN OK -> ALARM OFF")
+            print("[LOGIC] PIN OK -> ALARM OFF + DISARM")
             self._alarm_on = False
+            self._armed = False
+            self.registry["_system_on"] = bool(self._armed)
+            self._arming_until = 0.0
             self._door_open_since.clear()
             self._set_buzzer("DB", False)
             self._save_alarm_state(False)
+            return
 
+        if self._armed:
+            print("[LOGIC] PIN OK -> DISARM")
+            self._armed = False
+            self.registry["_system_on"] = bool(self._armed)
+            self._arming_until = 0.0
+            return
+
+        if self._arming_until:
+            print("[LOGIC] ARMING canceled")
+            self._arming_until = 0.0
+            return
+
+        self._arming_until = now + 10
+        print("[LOGIC] ARMING... system will activate in 10s")
 
     def _handle_dht_for_lcd(self, ev: DeviceEvent):
         if ev.device_id not in self.lcd_dht_ids:
@@ -389,3 +439,36 @@ class LogicEngine:
             self._set_buzzer("DB", True)
             self._save_alarm_state(True)
 
+    def _disarm_all(self, reason: str):
+        if self._alarm_on:
+            print(f"[SEC] DISARM ({reason}) -> ALARM OFF")
+        else:
+            print(f"[SEC] DISARM ({reason})")
+
+        self._alarm_on = False
+        self._armed = False
+        self.registry["_system_on"] = bool(self._armed)
+        self._arming_until = 0.0
+        self._entry_until = 0.0
+        self._waiting_entry_pin = False
+
+        self._set_buzzer(self.security_buzzer_id, False)
+        self._save_alarm_state(False)
+
+    def _handle_security_doors(self, ev: DeviceEvent):
+        if not self.security_enabled:
+            return
+        if ev.device_id not in self.security_doors:
+            return
+        if not self._armed:
+            return
+        if self._alarm_on:
+            return
+
+        is_open = 1 if bool(ev.value) else 0
+
+        if is_open:
+            print(f"[SEC] ALARM ON (door breach: {ev.device_id})")
+            self._alarm_on = True
+            self._set_buzzer(self.security_buzzer_id, True)
+            self._save_alarm_state(True)
